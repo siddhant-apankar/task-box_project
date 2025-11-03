@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taskbox - Your Academic Success, Simplified</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header id="mainHeader" class="header" style="display: none;">
+        <div class="header-container">
+            <div class="header-left">
+                <div class="logo">
+                    <img src="https://user-gen-media-assets.s3.amazonaws.com/seedream_images/6adf70d7-caed-4685-89b6-80d6cbd50ab6.png" alt="TASKBOX Logo" class="logo-image logo-navbar">
+                    <div>
+                        <h1>TASKBOX</h1>
+                        <p class="logo-subtitle">Your Academic Success, Simplified</p>
+                    </div>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="notification-icon" onclick="toggleNotifications()">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                    <span class="notification-badge" id="notificationBadge">0</span>
+                </div>
+                <div class="user-profile">
+                    <span id="userName">User</span>
+                    <button class="btn-logout" onclick="logout()">Logout</button>
+                </div>
+            </div>
+        </div>
+        <nav class="nav-tabs" id="navTabs" style="display: none;">
+            <!-- Dynamic navigation based on role -->
+        </nav>
+    </header>
+
+    <!-- Notification Panel -->
+    <div id="notificationPanel" class="notification-panel" style="display: none;">
+        <div class="notification-header">
+            <h3>Notifications</h3>
+            <button onclick="toggleNotifications()">✕</button>
+        </div>
+        <div id="notificationList" class="notification-list">
+            <!-- Notifications will be populated here -->
+        </div>
+    </div>
+
+    <!-- Landing/Login Page -->
+    <div id="landingPage" class="landing-page">
+        <div class="landing-hero">
+            <div class="landing-content">
+                <div class="university-badge">
+                    <img src="https://user-gen-media-assets.s3.amazonaws.com/seedream_images/6adf70d7-caed-4685-89b6-80d6cbd50ab6.png" alt="TASKBOX Logo" class="logo-image logo-landing">
+                    <h1>TASKBOX</h1>
+                    <p>Your Academic Success, Simplified</p>
+                </div>
+                <h2 class="landing-title">Welcome to TaskBox</h2>
+                <p class="landing-subtitle">Manage your college work easily — all in one place.</p>
+                
+                <div class="role-selection">
+                    <button class="role-btn" onclick="showAuthPage('login')">Login</button>
+                    <button class="role-btn" onclick="showAuthPage('signup')">Sign Up</button>
+                </div>
+            </div>
+        </div>
+        <footer class="landing-footer">
+            <p>© 2025 TaskBox | Built with dedication.</p>
+        </footer>
+    </div>
+
+    <!-- Login Modal with Dual Options -->
+    <div id="loginModal" class="modal" style="display: none;">
+        <div class="modal-content login-modal">
+            <span class="close" onclick="closeAuthModal()">&times;</span>
+            <img src="https://user-gen-media-assets.s3.amazonaws.com/seedream_images/6adf70d7-caed-4685-89b6-80d6cbd50ab6.png" alt="TASKBOX Logo" class="logo-image logo-form">
+            <h2>Login to Taskbox</h2>
+            
+            <!-- Login Method Tabs -->
+            <div class="tab-container">
+                <button class="tab-btn active" onclick="switchLoginTab('otp')">Login with OTP</button>
+                <button class="tab-btn" onclick="switchLoginTab('password')">Login with Password</button>
+            </div>
+            
+            <!-- OTP Login Tab -->
+            <div id="otpLoginTab" style="display: block;">
+                <!-- Step Indicator -->
+                <div class="step-indicator" id="stepIndicator">
+                    <div class="step active" id="step1">1. Enter Details</div>
+                    <div class="step" id="step2">2. Verify OTP</div>
+                </div>
+            
+                <!-- Step 1: Enter Email/Mobile -->
+                <form id="otpRequestForm" onsubmit="sendOTP(event)">
+                <div class="form-group">
+                    <label>Email or Mobile Number</label>
+                    <input type="text" id="otpEmailMobile" required placeholder="Enter email or mobile (10 digits)">
+                </div>
+                <div class="form-group">
+                    <label>Login Method</label>
+                    <div class="radio-group-inline">
+                        <label class="radio-label">
+                            <input type="radio" name="otpMethod" value="email" checked>
+                            <span>Email OTP</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="otpMethod" value="sms">
+                            <span>SMS OTP</span>
+                        </label>
+                    </div>
+                </div>
+                    <button type="submit" class="btn btn-primary btn-full">Send OTP</button>
+                </form>
+            
+                <!-- Step 2: Enter OTP -->
+                <form id="otpVerifyForm" style="display: none;" onsubmit="verifyOTP(event)">
+                <div class="success-message" id="otpSentMessage"></div>
+                <div class="form-group">
+                    <label>Enter 6-digit OTP</label>
+                    <input type="text" id="otpCode" required maxlength="6" placeholder="000000" class="otp-input">
+                </div>
+                <div class="timer-display" id="otpTimer"></div>
+                <div class="error-message" id="otpError" style="display: none;"></div>
+                    <button type="submit" class="btn btn-primary btn-full">Verify OTP</button>
+                    <div style="display: flex; gap: 12px; margin-top: 12px;">
+                        <button type="button" class="btn btn-secondary btn-full" onclick="resendOTP()" id="resendBtn" disabled>Resend OTP</button>
+                        <button type="button" class="btn btn-secondary btn-full" onclick="backToStep1()">Back</button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Password Login Tab -->
+            <div id="passwordLoginTab" style="display: none;">
+                <form id="passwordLoginForm" onsubmit="loginWithPassword(event)">
+                    <div class="form-group">
+                        <label>Email or Mobile Number *</label>
+                        <input type="text" id="passwordEmailMobile" required placeholder="Enter email or mobile (10 digits)">
+                    </div>
+                    <div class="form-group">
+                        <label>Password *</label>
+                        <div style="position: relative;">
+                            <input type="password" id="passwordInput" required placeholder="Enter your password">
+                            <button type="button" onclick="togglePasswordVisibility()" style="position: absolute; right: 12px; top: 12px; background: none; border: none; cursor: pointer; font-size: 14px;">Show</button>
+                        </div>
+                    </div>
+                    <div class="error-message" id="passwordError" style="display: none;"></div>
+                    <button type="submit" class="btn btn-primary btn-full">Login</button>
+                    <div style="text-align: center; margin-top: 16px;">
+                        <a href="#" onclick="showForgotPassword()" class="link-text">Forgot Password?</a>
+                    </div>
+                    <div style="text-align: center; margin-top: 8px;">
+                        <span class="link-text">Or <a href="#" onclick="switchLoginTab('otp')">Login with OTP</a></span>
+                    </div>
+                </form>
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--color-border);">
+                <span class="link-text">Don't have an account? <a href="#" onclick="showAuthPage('signup')">Sign Up</a></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Registration Modal -->
+    <div id="signupModal" class="modal" style="display: none;">
+        <div class="modal-content signup-modal">
+            <span class="close" onclick="closeAuthModal()">&times;</span>
+            <img src="https://user-gen-media-assets.s3.amazonaws.com/seedream_images/6adf70d7-caed-4685-89b6-80d6cbd50ab6.png" alt="TASKBOX Logo" class="logo-image logo-form">
+            <h2>Create Your Account</h2>
+            
+            <!-- Role Selection -->
+            <div class="role-toggle" id="roleToggle">
+                <button type="button" class="role-toggle-btn active" onclick="selectRole('student')">Student</button>
+                <button type="button" class="role-toggle-btn" onclick="selectRole('teacher')">Teacher</button>
+            </div>
+            
+            <!-- Student Registration Form -->
+            <form id="studentSignupForm" onsubmit="handleRegistration(event)">
+                <div class="form-group">
+                    <label>Full Name *</label>
+                    <input type="text" id="studentName" required placeholder="Enter your full name">
+                </div>
+                <div class="form-group">
+                    <label>Email Address *</label>
+                    <input type="email" id="studentEmail" required placeholder="your.email@taskbox.edu">
+                </div>
+                <div class="form-group">
+                    <label>Mobile Number (10 digits) *</label>
+                    <input type="tel" id="studentMobile" required placeholder="9876543210" pattern="[0-9]{10}" maxlength="10">
+                    <small>Format: 10 digits (e.g., 9876543210)</small>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Enrollment Number</label>
+                        <input type="text" id="studentEnrollment" placeholder="TB-2025XXX">
+                    </div>
+                    <div class="form-group">
+                        <label>Branch *</label>
+                        <select id="studentBranch" required>
+                            <option value="">Select Branch</option>
+                            <option value="IT">IT</option>
+                            <option value="CSE">CSE</option>
+                            <option value="Mechanical">Mechanical</option>
+                            <option value="Civil">Civil</option>
+                            <option value="Electrical">Electrical</option>
+                            <option value="Electronics">Electronics</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Semester *</label>
+                    <select id="studentSemester" required>
+                        <option value="">Select Semester</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Password *</label>
+                    <input type="password" id="studentPassword" required placeholder="Min 8 chars, 1 uppercase, 1 number" minlength="8">
+                    <div class="password-strength" id="studentPasswordStrength"></div>
+                </div>
+                <div class="form-group">
+                    <label>Confirm Password *</label>
+                    <input type="password" id="studentConfirmPassword" required placeholder="Re-enter password">
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">Register as Student</button>
+            </form>
+            
+            <!-- Teacher Registration Form -->
+            <form id="teacherSignupForm" style="display: none;" onsubmit="handleRegistration(event)">
+                <div class="form-group">
+                    <label>Full Name *</label>
+                    <input type="text" id="teacherName" required placeholder="Enter your full name">
+                </div>
+                <div class="form-group">
+                    <label>Email Address *</label>
+                    <input type="email" id="teacherEmail" required placeholder="your.email@taskbox.edu">
+                </div>
+                <div class="form-group">
+                    <label>Mobile Number (10 digits) *</label>
+                    <input type="tel" id="teacherMobile" required placeholder="9876543210" pattern="[0-9]{10}" maxlength="10">
+                    <small>Format: 10 digits (e.g., 9876543210)</small>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Employee ID</label>
+                        <input type="text" id="teacherEmployeeId" placeholder="EMP001">
+                    </div>
+                    <div class="form-group">
+                        <label>Department *</label>
+                        <select id="teacherDepartment" required>
+                            <option value="">Select Department</option>
+                            <option value="IT">IT</option>
+                            <option value="CSE">CSE</option>
+                            <option value="Mechanical">Mechanical</option>
+                            <option value="Civil">Civil</option>
+                            <option value="Electrical">Electrical</option>
+                            <option value="Electronics">Electronics</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Password *</label>
+                    <input type="password" id="teacherPassword" required placeholder="Min 8 chars, 1 uppercase, 1 number" minlength="8">
+                    <div class="password-strength" id="teacherPasswordStrength"></div>
+                </div>
+                <div class="form-group">
+                    <label>Confirm Password *</label>
+                    <input type="password" id="teacherConfirmPassword" required placeholder="Re-enter password">
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">Register as Teacher</button>
+            </form>
+            
+            <div style="text-align: center; margin-top: 16px;">
+                <span class="link-text">Already have an account? <a href="#" onclick="showAuthPage('login')">Login</a></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgotPasswordModal" class="modal" style="display: none;">
+        <div class="modal-content login-modal">
+            <span class="close" onclick="closeAuthModal()">&times;</span>
+            <img src="https://user-gen-media-assets.s3.amazonaws.com/seedream_images/6adf70d7-caed-4685-89b6-80d6cbd50ab6.png" alt="TASKBOX Logo" class="logo-image logo-form">
+            <h2>Reset Password</h2>
+            
+            <!-- Step 1: Request Reset OTP -->
+            <form id="forgotPasswordForm" onsubmit="sendResetOTP(event)">
+                <div class="form-group">
+                    <label>Email or Mobile Number</label>
+                    <input type="text" id="resetEmailMobile" required placeholder="Enter your registered email or mobile (10 digits)">
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">Send Reset OTP</button>
+                <div style="text-align: center; margin-top: 16px;">
+                    <a href="#" onclick="showAuthPage('login')" class="link-text">← Back to Login</a>
+                </div>
+            </form>
+            
+            <!-- Step 2: Verify OTP and Reset -->
+            <form id="resetPasswordForm" style="display: none;" onsubmit="resetPassword(event)">
+                <div class="success-message" id="resetOtpSentMessage"></div>
+                <div class="form-group">
+                    <label>Enter 6-digit OTP</label>
+                    <input type="text" id="resetOtpCode" required maxlength="6" placeholder="000000" class="otp-input">
+                </div>
+                <div class="form-group">
+                    <label>New Password *</label>
+                    <input type="password" id="newPassword" required placeholder="Min 8 chars, 1 uppercase, 1 number" minlength="8">
+                    <div class="password-strength" id="newPasswordStrength"></div>
+                </div>
+                <div class="form-group">
+                    <label>Confirm New Password *</label>
+                    <input type="password" id="confirmNewPassword" required placeholder="Re-enter password">
+                </div>
+                <div class="error-message" id="resetError" style="display: none;"></div>
+                <button type="submit" class="btn btn-primary btn-full">Reset Password</button>
+                <div style="display: flex; gap: 12px; margin-top: 12px;">
+                    <button type="button" class="btn btn-secondary btn-full" onclick="resendResetOTP()" id="resendResetBtn">Resend OTP</button>
+                    <button type="button" class="btn btn-secondary btn-full" onclick="backToForgotStep1()">Back</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Student Dashboard -->
+    <div id="studentDashboard" class="dashboard" style="display: none;">
+        <div class="dashboard-header">
+            <h2>Student Dashboard</h2>
+            <div class="dashboard-actions">
+                <input type="text" id="studentSearch" placeholder="Search assignments..." onkeyup="filterStudentAssignments()">
+                <select id="studentSubjectFilter" onchange="filterStudentAssignments()">
+                    <option value="">All Subjects</option>
+                </select>
+                <select id="studentStatusFilter" onchange="filterStudentAssignments()">
+                    <option value="">All Status</option>
+                    <option value="upcoming">Upcoming</option>
+                    <option value="ongoing">Ongoing</option>
+                    <option value="submitted">Submitted</option>
+                    <option value="graded">Graded</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- Student Learner Level Badge -->
+        <div class="learner-level-badge" id="studentLearnerBadge">
+            <!-- Will be populated by JS -->
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card bg-blue">
+                <div class="stat-icon">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <h3 id="totalAssignments">0</h3>
+                    <p>Total Assignments</p>
+                </div>
+            </div>
+            <div class="stat-card bg-orange">
+                <div class="stat-icon">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <h3 id="pendingAssignments">0</h3>
+                    <p>Pending</p>
+                </div>
+            </div>
+            <div class="stat-card bg-green">
+                <div class="stat-icon">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <h3 id="submittedAssignments">0</h3>
+                    <p>Submitted</p>
+                </div>
+            </div>
+            <div class="stat-card bg-purple">
+                <div class="stat-icon">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+                        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+                        <path d="M4 22h16"></path>
+                        <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
+                        <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
+                        <path d="M18 2H6v7a6 6 0 0 0 12 0V2z"></path>
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <h3 id="avgMarks">0</h3>
+                    <p>Average Score</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="assignmentsList" class="assignments-list">
+            <!-- Assignments will be populated here -->
+        </div>
+    </div>
+
+    <!-- Assignment Details View -->
+    <div id="assignmentDetails" class="assignment-details" style="display: none;">
+        <button class="btn-back" onclick="goBackToDashboard()">Back to Dashboard</button>
+        
+        <div class="assignment-detail-container">
+            <div class="assignment-header-detail">
+                <h2 id="detailTitle"></h2>
+                <span id="detailStatus" class="status-badge"></span>
+            </div>
+            
+            <div class="detail-grid">
+                <div class="detail-main">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Assignment Information</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="info-row">
+                                <strong>Subject:</strong>
+                                <span id="detailSubject"></span>
+                            </div>
+                            <div class="info-row">
+                                <strong>Due Date:</strong>
+                                <span id="detailDueDate"></span>
+                            </div>
+                            <div class="info-row">
+                                <strong>Total Marks:</strong>
+                                <span id="detailMarks"></span>
+                            </div>
+                            <div class="info-row">
+                                <strong>Time Remaining:</strong>
+                                <span id="detailTimer" class="countdown-timer"></span>
+                            </div>
+                            <div class="info-row description">
+                                <strong>Description:</strong>
+                                <p id="detailDescription"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submission Section -->
+                    <div class="card" id="submissionCard">
+                        <div class="card-header">
+                            <h3>Submit Assignment</h3>
+                        </div>
+                        <div class="card-body">
+                            <form id="submissionForm" onsubmit="submitAssignment(event)">
+                                <div class="form-group">
+                                    <label>Upload File (PDF, DOCX, ZIP)</label>
+                                    <input type="file" id="fileUpload" accept=".pdf,.doc,.docx,.zip" onchange="handleFileSelect(event)">
+                                    <div id="filePreview" class="file-preview"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Comments (Optional)</label>
+                                    <textarea id="submissionComments" rows="3" placeholder="Add any comments or notes..."></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-full">Submit Assignment</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Version History -->
+                    <div class="card" id="versionHistoryCard" style="display: none;">
+                        <div class="card-header">
+                            <h3>Submission History</h3>
+                        </div>
+                        <div class="card-body">
+                            <div id="versionHistory"></div>
+                        </div>
+                    </div>
+
+                    <!-- Feedback Section -->
+                    <div class="card" id="feedbackCard" style="display: none;">
+                        <div class="card-header">
+                            <h3>Teacher Feedback</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="feedback-content">
+                                <div class="marks-display">
+                                    <span class="marks-label">Score:</span>
+                                    <span id="obtainedMarks" class="marks-value"></span>
+                                </div>
+                                <div class="feedback-text" id="feedbackText"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-sidebar">
+                    <!-- Comments/Chat Section -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Doubts &amp; Discussion</h3>
+                        </div>
+                        <div class="card-body">
+                            <div id="commentsList" class="comments-list">
+                                <!-- Comments will be populated here -->
+                            </div>
+                            <form id="commentForm" onsubmit="postComment(event)">
+                                <textarea id="commentInput" placeholder="Ask your doubt..." rows="2" required></textarea>
+                                <button type="submit" class="btn btn-primary btn-full">Post Comment</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teacher Dashboard -->
+    <div id="teacherDashboard" class="dashboard" style="display: none;">
+        <div class="dashboard-header">
+            <h2>Teacher Dashboard</h2>
+            <button class="btn btn-primary" onclick="showCreateAssignment()">Create Assignment</button>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card bg-blue">
+                <div class="stat-icon">📚</div>
+                <div class="stat-info">
+                    <h3 id="teacherTotalAssignments">0</h3>
+                    <p>Total Assignments</p>
+                </div>
+            </div>
+            <div class="stat-card bg-orange">
+                <div class="stat-icon">⏳</div>
+                <div class="stat-info">
+                    <h3 id="teacherPendingEval">0</h3>
+                    <p>Pending Evaluation</p>
+                </div>
+            </div>
+            <div class="stat-card bg-red">
+                <div class="stat-icon">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <h3 id="teacherLateSubmissions">0</h3>
+                    <p>Late Submissions</p>
+                </div>
+            </div>
+            <div class="stat-card bg-green">
+                <div class="stat-icon">✅</div>
+                <div class="stat-info">
+                    <h3 id="teacherEvaluated">0</h3>
+                    <p>Evaluated</p>
+                </div>
+            </div>
+            <div class="stat-card notification-card" onclick="showNotificationModal()" style="cursor: pointer;">
+                <div class="stat-icon">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M8.56 2.75c.99-.69 2.37-.69 3.36 0l.66.46c1.2.84 2.8.84 4 0l.66-.46c.99-.69 2.37-.69 3.36 0l.66.46a5.04 5.04 0 0 0 4.2.4l.86-.29c1.13-.38 2.38.36 2.55 1.52l.13.85c.19 1.26 1.04 2.33 2.2 2.78l.83.32c1.09.42 1.62 1.67 1.14 2.73l-.37.82a4.992 4.992 0 0 0 0 4l.37.82c.48 1.06-.05 2.31-1.14 2.73l-.83.32c-1.16.45-2.01 1.52-2.2 2.78l-.13.85c-.17 1.16-1.42 1.9-2.55 1.52l-.86-.29a5.04 5.04 0 0 0-4.2.4l-.66.46c-.99.69-2.37.69-3.36 0l-.66-.46a5.04 5.04 0 0 0-4 0l-.66.46c-.99.69-2.37.69-3.36 0l-.66-.46a5.04 5.04 0 0 0-4.2-.4l-.86.29c-1.13.38-2.38-.36-2.55-1.52l-.13-.85a5.003 5.003 0 0 0-2.2-2.78l-.83-.32c-1.09-.42-1.62-1.67-1.14-2.73l.37-.82a4.992 4.992 0 0 0 0-4l-.37-.82c-.48-1.06.05-2.31 1.14-2.73l.83-.32c1.16-.45 2.01-1.52 2.2-2.78l.13-.85c.17-1.16 1.42-1.9 2.55-1.52l.86.29a5.04 5.04 0 0 0 4.2-.4l.66-.46z"></path>
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <h3>Send</h3>
+                    <p>Notification</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="submissionChart"></canvas>
+        </div>
+
+        <div id="teacherAssignmentsList" class="assignments-list">
+            <!-- Teacher's assignments will be populated here -->
+        </div>
+    </div>
+
+    <!-- Create Assignment Page -->
+    <div id="createAssignmentPage" class="create-assignment" style="display: none;">
+        <button class="btn-back" onclick="goBackToTeacherDashboard()">Back to Dashboard</button>
+        
+        <div class="card">
+            <div class="card-header">
+                <h2>Create New Assignment</h2>
+            </div>
+            <div class="card-body">
+                <form id="createAssignmentForm" onsubmit="createAssignment(event)">
+                    <div class="form-group">
+                        <label>Assignment Title *</label>
+                        <input type="text" id="assignmentTitle" required placeholder="Enter assignment title">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Subject *</label>
+                        <select id="assignmentSubject" required>
+                            <option value="">Select Subject</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Due Date *</label>
+                            <input type="datetime-local" id="assignmentDueDate" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Total Marks *</label>
+                            <input type="number" id="assignmentMarks" required min="1" max="100" placeholder="Enter marks">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Description *</label>
+                        <textarea id="assignmentDescription" required rows="5" placeholder="Enter assignment description and instructions..."></textarea>
+                    </div>
+                    
+                    <!-- NEW - Learner Type Selection -->
+                    <div class="form-group">
+                        <label>Target Learner Type(s) *</label>
+                        <p style="font-size: 12px; color: var(--color-text-secondary); margin-bottom: 12px;">Select one or more learner types for this assignment</p>
+                        <div class="learner-type-selection">
+                            <label class="learner-type-card" data-type="Advanced">
+                                <input type="checkbox" name="learnerTypes" value="Advanced">
+                                <div class="learner-type-content">
+                                    <span class="learner-icon"></span>
+                                    <h4>Advanced Learners</h4>
+                                    <p>High-performing students</p>
+                                    <span class="difficulty-badge advanced">Hard</span>
+                                </div>
+                            </label>
+                            <label class="learner-type-card" data-type="Average">
+                                <input type="checkbox" name="learnerTypes" value="Average">
+                                <div class="learner-type-content">
+                                    <span class="learner-icon"></span>
+                                    <h4>Average Learners</h4>
+                                    <p>Standard students</p>
+                                    <span class="difficulty-badge average">Medium</span>
+                                </div>
+                            </label>
+                            <label class="learner-type-card" data-type="Slow">
+                                <input type="checkbox" name="learnerTypes" value="Slow">
+                                <div class="learner-type-content">
+                                    <span class="learner-icon"></span>
+                                    <h4>Slow Learners</h4>
+                                    <p>Students needing support</p>
+                                    <span class="difficulty-badge slow">Easy</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Attachments (Templates/Instructions)</label>
+                        <input type="file" id="assignmentAttachment" multiple>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">✅ Publish Assignment</button>
+                        <button type="button" class="btn btn-secondary" onclick="goBackToTeacherDashboard()">❌ Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Evaluate Submissions Page -->
+    <div id="evaluatePage" class="evaluate-page" style="display: none;">
+        <button class="btn-back" onclick="goBackToTeacherDashboard()">← Back to Dashboard</button>
+        
+        <div class="evaluate-header">
+            <h2 id="evaluateTitle"></h2>
+            <div class="evaluate-actions">
+                <button class="btn btn-secondary" onclick="downloadAllSubmissions()">Download All</button>
+                <select id="evaluateFilter" onchange="filterSubmissions()">
+                    <option value="all">All Submissions</option>
+                    <option value="submitted">Submitted</option>
+                    <option value="late">Late Submissions</option>
+                    <option value="missing">Missing</option>
+                    <option value="evaluated">Evaluated</option>
+                </select>
+            </div>
+        </div>
+        
+        <div id="submissionsList" class="submissions-table">
+            <!-- Submissions will be populated here -->
+        </div>
+    </div>
+
+    <!-- Grade Modal -->
+    <div id="gradeModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeGradeModal()">&times;</span>
+            <h2>Grade Submission</h2>
+            <form id="gradeForm" onsubmit="submitGrade(event)">
+                <div class="form-group">
+                    <label>Student Name</label>
+                    <input type="text" id="gradeStudentName" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label>Marks Obtained *</label>
+                    <input type="number" id="gradeMarks" required min="0">
+                    <small>Out of <span id="gradeTotalMarks"></span> marks</small>
+                </div>
+                
+                <div class="form-group">
+                    <label>Feedback/Comments *</label>
+                    <textarea id="gradeFeedback" required rows="4" placeholder="Provide detailed feedback..."></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-full">Submit Grade</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Leaderboard Page -->
+    <div id="leaderboardPage" class="leaderboard-page" style="display: none;">
+        <div class="dashboard-header">
+            <h2>Leaderboard &amp; Progress Tracker</h2>
+        </div>
+        
+        <div class="leaderboard-container">
+            <div class="leaderboard-main">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Top Performers</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="leaderboardList" class="leaderboard-list">
+                            <!-- Leaderboard will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="leaderboard-sidebar">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Your Performance</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="studentPerformance" class="performance-stats">
+                            <!-- Performance stats will be populated here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Subject-wise Average</h3>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Send Notification Modal -->
+    <div id="notificationModal" class="modal" style="display: none;">
+        <div class="modal-content notification-modal-content">
+            <span class="close" onclick="closeNotificationModal()">&times;</span>
+            <h2>Send Notification</h2>
+            <form id="notificationForm" onsubmit="sendNotification(event)">
+                <div class="form-group">
+                    <label>Notification Type *</label>
+                    <select id="notificationType" required>
+                        <option value="">Select Type</option>
+                        <option value="new_assignment">New Assignment Alert</option>
+                        <option value="deadline_reminder">Deadline Reminder</option>
+                        <option value="deadline_extension">Deadline Extension</option>
+                        <option value="general">General Announcement</option>
+                        <option value="late_warning">Late Submission Warning</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Select Subject *</label>
+                    <select id="notificationSubject" required onchange="loadNotificationAssignments()">
+                        <option value="">Select Subject</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Select Assignment (Optional)</label>
+                    <select id="notificationAssignment">
+                        <option value="all">All Assignments in Subject</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Recipients *</label>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="recipients" value="all" checked onchange="toggleStudentSelection()">
+                            <span>All Students in Subject</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="recipients" value="specific" onchange="toggleStudentSelection()">
+                            <span>Specific Students</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-group" id="studentSelectionGroup" style="display: none;">
+                    <label>Select Students</label>
+                    <div id="studentCheckboxes" class="checkbox-group">
+                        <!-- Student checkboxes will be populated here -->
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Message Title *</label>
+                    <input type="text" id="notificationTitle" required placeholder="Enter notification title">
+                </div>
+                
+                <div class="form-group">
+                    <label>Message Content *</label>
+                    <textarea id="notificationContent" required rows="4" placeholder="Enter your message..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Schedule</label>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="schedule" value="now" checked onchange="toggleSchedulePicker()">
+                            <span>Send Now</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="schedule" value="later" onchange="toggleSchedulePicker()">
+                            <span>Schedule for Later</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-group" id="schedulePickerGroup" style="display: none;">
+                    <label>Schedule Date &amp; Time</label>
+                    <input type="datetime-local" id="scheduleDateTime">
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-full">Send Notification</button>
+                    <button type="button" class="btn btn-secondary btn-full" onclick="closeNotificationModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Logout Confirmation Modal -->
+    <div id="logoutConfirmModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <h2 style="margin-bottom: 20px;">🚪 Logout Confirmation</h2>
+            <p style="font-size: 16px; color: var(--color-medium-text); margin-bottom: 30px;">Are you sure you want to logout?</p>
+            <div style="display: flex; gap: 12px; justify-content: center;">
+                <button class="btn btn-secondary" onclick="closeLogoutModal()" style="min-width: 120px;">Cancel</button>
+                <button class="btn btn-primary" onclick="confirmLogout()" style="min-width: 120px; background: var(--color-error-red);">Yes, Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Footer for Dashboard Pages -->
+    <footer id="dashboardFooter" class="dashboard-footer" style="display: none;">
+        <p>© 2025 TaskBox | Built with dedication.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
